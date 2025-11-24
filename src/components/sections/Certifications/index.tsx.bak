@@ -1,0 +1,293 @@
+import React, { useEffect, useRef, useState } from "react";
+import styled from "styled-components";
+import { useTranslation } from "react-i18next";
+import { CountUp } from "../../common/CountUp";
+import { zoomIn, pulse } from "../../../styles/animations";
+import { Wave } from "../../common/Wave";
+
+const StatsSection = styled.section`
+  padding: 10rem 0 0 0;
+  background: white;
+  position: relative;
+  overflow: visible;
+  padding-bottom: 20rem;
+
+  @media (max-width: 768px) {
+    padding: 5rem 0 0 0;
+    padding-bottom: 15rem;
+  }
+`;
+
+const Container = styled.div`
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 2rem;
+`;
+
+const TitleWrapper = styled.div<{ $isInView: boolean }>`
+  text-align: center;
+  margin-bottom: 5rem;
+  opacity: ${(props) => (props.$isInView ? 1 : 0)};
+  transform: translateY(${(props) => (props.$isInView ? "0" : "30px")});
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+
+  @media (max-width: 768px) {
+    margin-bottom: 3rem;
+  }
+`;
+
+const Title = styled.h3`
+  font-family: ${(props) => props.theme.typography.fontFamily.secondary};
+  font-size: 4rem;
+  color: #00215e;
+  line-height: 1.4;
+  font-weight: 700;
+  max-width: 968px;
+  margin: 0 auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: 3rem;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoints.sm}) {
+    font-size: 2.5rem;
+  }
+`;
+
+const StatInner = styled.div<{ $color: string; $isInView: boolean }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #e6e9ef;
+  padding: 0.5rem;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: ${(props) => props.$color};
+    clip-path: ${(props) =>
+      props.$isInView ? "inset(50% 0 0 0)" : "inset(100% 0 0 0)"};
+    transition: clip-path 3s ease, opacity 0.3s ease;
+    z-index: 0;
+    opacity: 0.5;
+  }
+`;
+
+const StatItem = styled.div<{ $color: string }>`
+  width: calc(100% / 4 - 2.5rem);
+  max-width: 300px;
+  min-width: 220px;
+  position: relative;
+  opacity: 0;
+  animation: ${zoomIn} 0.5s ease-out forwards;
+  animation-delay: calc(var(--index) * 0.1s);
+  cursor: pointer;
+
+  @media (max-width: 900px) {
+    width: calc(50% - 1rem);
+    min-width: 180px;
+    max-width: 250px;
+  }
+
+  @media (max-width: 600px) {
+    width: 100%;
+    max-width: 20rem;
+  }
+
+  &:nth-child(1) {
+    --index: 0;
+  }
+  &:nth-child(2) {
+    --index: 1;
+  }
+  &:nth-child(3) {
+    --index: 2;
+  }
+
+  &::before {
+    content: "";
+    display: block;
+    padding-top: 100%;
+  }
+
+  &:hover ${StatInner} {
+    transform: scale(1.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+`;
+
+const StatContent = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  z-index: 2;
+  padding: 1rem;
+
+  @media (max-width: 500px) {
+    gap: 0.5rem;
+  }
+`;
+
+const StatNumber = styled.div`
+  color: #00215e;
+  font-family: "SVN-Bebas Neue Pro", "Bebas Neue", Arial, sans-serif;
+  display: flex;
+  align-items: flex-start;
+  line-height: 1;
+  font-size: 10rem;
+
+  @media (max-width: 1200px) {
+    font-size: 7rem;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 5rem;
+  }
+`;
+
+const StatLabel = styled.p`
+  font-size: 2rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  max-width: 90%;
+  margin: 0;
+  color: #00215e;
+  line-height: 1.2;
+
+  @media (max-width: 1200px) {
+    font-size: 1.6rem;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 1.2rem;
+  }
+`;
+
+const Suffix = styled.span`
+  font-size: 0.5em;
+`;
+
+const StatsGrid = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  max-width: 100%;
+  flex-wrap: wrap;
+  padding: 0 2rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
+    gap: 2rem;
+  }
+
+  @media (max-width: 900px) {
+    max-width: 50rem;
+    margin: 0 auto;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 360px) {
+    justify-content: center;
+  }
+`;
+
+export const Stats: React.FC = () => {
+  const { t } = useTranslation();
+  const [isInView, setIsInView] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
+  const stats = [
+    {
+      value: parseInt(t("stats.countriesValue")),
+      suffix: t("stats.countriesSuffix"),
+      label: t("stats.countries"),
+      color: "#151DD3",
+    },
+    {
+      value: parseInt(t("stats.containersValue")),
+      suffix: t("stats.containersSuffix"),
+      label: t("stats.containers"),
+      color: "#6EC207",
+    },
+    {
+      value: parseInt(t("stats.seafoodFactoryValue")),
+      suffix: t("stats.seafoodFactorySuffix"),
+      label: t("stats.seafoodFactory"),
+      color: "#ECAF00",
+    },
+  ];
+
+  return (
+    <StatsSection ref={sectionRef}>
+      <Container>
+        <TitleWrapper $isInView={isInView}>
+          <Title>{t("stats.title")}</Title>
+        </TitleWrapper>
+        <StatsGrid>
+          {stats.map((stat, index) => (
+            <StatItem key={index} $color={stat.color}>
+              <StatInner $color={stat.color} $isInView={isInView}>
+                <StatContent>
+                  <StatNumber>
+                    <CountUp end={stat.value} duration={2.5} />
+                    <Suffix>{stat.suffix}</Suffix>
+                  </StatNumber>
+                  <StatLabel>{stat.label}</StatLabel>
+                </StatContent>
+              </StatInner>
+            </StatItem>
+          ))}
+        </StatsGrid>
+      </Container>
+      <Wave
+        colors={[
+          "rgba(132, 185, 43, 0.7)",
+          "rgba(132, 185, 43, 0.5)",
+          "rgba(132, 185, 43, 0.3)",
+          "#84b92b",
+        ]}
+      />
+    </StatsSection>
+  );
+};
