@@ -1,0 +1,88 @@
+// Banner section styles ported from original project for pixel-perfect match
+.sec-fac-bn {
+  position: relative;
+  width: 100%;
+  min-height: 600px;
+  background: linear-gradient(180deg, #eaf6fa 0%, #fff 100%);
+  overflow: hidden;
+  .fac-bn {
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .decs {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      .decs-in {
+        width: 100%;
+        height: 100%;
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+    .container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 600px;
+      .fac-bn-ctn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        .tt {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #0a2536;
+          margin-bottom: 1.5rem;
+          letter-spacing: 0.05em;
+        }
+        .des {
+          font-size: 1.125rem;
+          color: #0a2536;
+          margin-bottom: 2rem;
+          max-width: 600px;
+          text-align: center;
+        }
+        .big {
+          font-size: 5rem;
+          font-weight: 900;
+          color: #eaf6fa;
+          letter-spacing: 0.1em;
+          margin-bottom: 1.5rem;
+        }
+        .brush {
+          display: block;
+          width: 180px;
+          height: 32px;
+          position: relative;
+          .brush-in {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            // Dùng <img> trong JSX thay vì background-image để tránh lỗi path
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+        }
+      }
+    }
+  }
+}
